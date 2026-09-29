@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101010" />
+  <title>FlipTracker</title>
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0f0f10;
+  --card: #1b1b1e;
+  --card-2: #252529;
+  --border: #35353b;
+  --text: #f5f5f7;
+  --muted: #a6a6ad;
+  --good: #59d76f;
+  --warn: #f4b24d;
+  --bad: #ff6b6b;
+  --accent: #ffffff;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  width: min(100% - 28px, 1020px);
+  margin: 28px auto 60px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 20px;
+  align-items: end;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  margin-bottom: 8px;
+}
+
+h2 {
+  margin-bottom: 16px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.inline,
+.button-row,
+.section-title-row {
+  display: flex;
+  gap: 10px;
+}
+
+.section-title-row {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bankroll-input label,
+label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  background: #121214;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 13px;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: #666670;
+}
+
+button {
+  background: var(--accent);
+  color: #111;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button.secondary,
+button.ghost {
+  background: #323238;
+  color: var(--text);
+}
+
+button.danger {
+  color: #ffd6d6;
+}
+
+.button-row {
+  margin-top: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 15px;
+}
+
+.stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.stat strong {
+  font-size: 1.35rem;
+}
+
+.result-box,
+.better-move {
+  margin-top: 16px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+.verdict {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.good {
+  color: var(--good);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.bad {
+  color: var(--bad);
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.deal-card,
+.compare-card,
+.category-card {
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.deal-card h3,
+.compare-card h3,
+.category-card h3 {
+  margin-bottom: 8px;
+}
+
+.deal-meta,
+.compare-grid,
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mini-stat {
+  background: #171719;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.mini-stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  margin-bottom: 4px;
+}
+
+.mini-stat strong {
+  font-size: 0.95rem;
+}
+
+.deal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.deal-actions label {
+  min-width: 150px;
+  flex: 1;
+}
+
+.small-button {
+  padding: 10px 12px;
+}
+
+.warning-note {
+  color: var(--warn);
+  margin-top: 10px;
+}
+
+.better-move:empty {
+  display: none;
+}
+
+.better-move h3 {
+  color: var(--good);
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .form-grid,
+  .stats-grid,
+  .deal-meta,
+  .compare-grid,
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inline,
+  .button-row,
+  .section-title-row {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero card">
+      <div>
+        <p class="eyebrow">PERSONAL RESELLER TOOL</p>
+        <h1>FlipTracker</h1>
+        <p class="muted">Track your bankroll, analyze deals, and see which flip is the better move.</p>
+      </div>
+      <div class="bankroll-input">
+        <label for="bankroll">Starting bankroll</label>
+        <div class="inline">
+          <input id="bankroll" type="number" min="0" step="0.01" placeholder="500" />
+          <button id="saveBankrollBtn">Save</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Money Dashboard</h2>
+      <div class="stats-grid">
+        <div class="stat"><span>Starting Bankroll</span><strong id="startingBankroll">$0.00</strong></div>
+        <div class="stat"><span>Available Cash</span><strong id="availableCash">$0.00</strong></div>
+        <div class="stat"><span>Money Tied Up</span><strong id="moneyTiedUp">$0.00</strong></div>
+        <div class="stat"><span>Realized Profit</span><strong id="realizedProfit">$0.00</strong></div>
+        <div class="stat"><span>Items Sold</span><strong id="soldCount">0</strong></div>
+        <div class="stat"><span>Active Inventory</span><strong id="activeInventory">0</strong></div>
+        <div class="stat"><span>Average Profit</span><strong id="averageProfit">$0.00</strong></div>
+        <div class="stat"><span>Average ROI</span><strong id="averageROI">0.0%</strong></div>
+        <div class="stat"><span>Avg. Days to Sell</span><strong id="averageDays">0.0</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Analyze a Flip</h2>
+      <div class="form-grid">
+        <label>Item
+          <input id="itemName" type="text" placeholder="iPhone 14" />
+        </label>
+        <label>Category
+          <select id="category">
+            <option>Phones</option>
+            <option>GPUs</option>
+            <option>PC Parts</option>
+            <option>Cameras</option>
+            <option>Consoles</option>
+            <option>Cards</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Seller price
+          <input id="buyPrice" type="number" min="0" step="0.01" placeholder="220" />
+        </label>
+        <label>Expected resale
+          <input id="sellPrice" type="number" min="0" step="0.01" placeholder="320" />
+        </label>
+        <label>Selling fee %
+          <input id="fee" type="number" min="0" step="0.01" value="13" />
+        </label>
+        <label>Shipping
+          <input id="shipping" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Repair / cleaning
+          <input id="repair" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Purchase tax %
+          <input id="tax" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Minimum ROI %
+          <input id="minimumROI" type="number" min="0" step="0.1" value="30" />
+        </label>
+        <label>Date bought
+          <input id="dateBought" type="date" />
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="analyzeBtn">Analyze Flip</button>
+        <button id="saveDealBtn" class="secondary">Save Deal</button>
+      </div>
+
+      <div id="analysisResult" class="result-box hidden">
+        <div id="verdict" class="verdict"></div>
+        <p id="resultProfit"></p>
+        <p id="resultROI"></p>
+        <p id="maxOffer"></p>
+        <p id="openingOffer"></p>
+        <p id="cashCheck"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>What Should I Buy?</h2>
+      <p class="muted">Add a few deals and FlipTracker will show the better move based on affordability, profit per day, and ROI.</p>
+
+      <div class="form-grid">
+        <label>Item
+          <input id="compareItem" type="text" placeholder="RTX 5070" />
+        </label>
+        <label>Category
+          <select id="compareCategory">
+            <option>Phones</option>
+            <option>GPUs</option>
+            <option>PC Parts</option>
+            <option>Cameras</option>
+            <option>Consoles</option>
+            <option>Cards</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Buy price
+          <input id="compareBuy" type="number" min="0" step="0.01" />
+        </label>
+        <label>Expected sale
+          <input id="compareSell" type="number" min="0" step="0.01" />
+        </label>
+        <label>Fees %
+          <input id="compareFee" type="number" min="0" step="0.01" value="13" />
+        </label>
+        <label>Extra costs
+          <input id="compareExtra" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Expected days to sell
+          <input id="compareDays" type="number" min="1" step="1" value="7" />
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="addCompareBtn">Add Deal to Compare</button>
+        <button id="clearCompareBtn" class="secondary">Clear Comparison</button>
+      </div>
+
+      <div id="betterMove" class="better-move"></div>
+      <div id="dealComparison" class="stack"></div>
+    </section>
+
+    <section class="card">
+      <h2>Category Analytics</h2>
+      <div id="categoryAnalytics" class="stack"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <div>
+          <h2>Inventory & Deal History</h2>
+          <p class="muted">Bought → Listed → Sold</p>
+        </div>
+        <button id="clearDealsBtn" class="danger ghost">Clear All</button>
+      </div>
+      <div id="dealHistory" class="stack"></div>
+    </section>
+  </main>
+
+  <script>
+const $ = (id) => document.getElementById(id);
+
+let currentDeal = null;
+let potentialDeals = JSON.parse(localStorage.getItem("potentialDeals") || "[]");
+
+function money(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+function today() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getDeals() {
+  return JSON.parse(localStorage.getItem("flipDeals") || "[]");
+}
+
+function saveDeals(deals) {
+  localStorage.setItem("flipDeals", JSON.stringify(deals));
+}
+
+function getBankroll() {
+  return Number(localStorage.getItem("flipBankroll") || 0);
+}
+
+function saveBankroll() {
+  const bankroll = Math.max(0, Number($("bankroll").value || 0));
+  localStorage.setItem("flipBankroll", String(bankroll));
+  updateEverything();
+}
+
+function daysBetween(start, end) {
+  if (!start || !end) return 0;
+  const a = new Date(`${start}T00:00:00`);
+  const b = new Date(`${end}T00:00:00`);
+  return Math.max(0, Math.round((b - a) / 86400000));
+}
+
+function getActualProfit(deal) {
+  const salePrice = Number(deal.actualSalePrice ?? deal.expectedSale ?? 0);
+  const fee = salePrice * (Number(deal.feePercent || 0) / 100);
+  return salePrice - fee - Number(deal.totalCost || 0);
+}
+
+function calculateAvailableCash() {
+  const bankroll = getBankroll();
+  const deals = getDeals();
+
+  let tiedUp = 0;
+  let realizedProfit = 0;
+
+  deals.forEach((deal) => {
+    if (deal.status === "Sold") {
+      realizedProfit += getActualProfit(deal);
+    } else {
+      tiedUp += Number(deal.totalCost || 0);
+    }
+  });
+
+  return bankroll + realizedProfit - tiedUp;
+}
+
+function calculateFlip() {
+  const item = $("itemName").value.trim() || "Unnamed Item";
+  const category = $("category").value;
+  const buyPrice = Number($("buyPrice").value);
+  const expectedSale = Number($("sellPrice").value);
+  const feePercent = Number($("fee").value || 0);
+  const shipping = Number($("shipping").value || 0);
+  const repair = Number($("repair").value || 0);
+  const taxPercent = Number($("tax").value || 0);
+  const minimumROI = Number($("minimumROI").value || 0);
+  const dateBought = $("dateBought").value || today();
+
+  if (buyPrice <= 0 || expectedSale <= 0) {
+    alert("Enter a valid buy price and expected resale price.");
+    return;
+  }
+
+  const purchaseTax = buyPrice * (taxPercent / 100);
+  const totalCost = buyPrice + purchaseTax + shipping + repair;
+  const sellingFee = expectedSale * (feePercent / 100);
+  const expectedProfit = expectedSale - sellingFee - totalCost;
+  const expectedROI = totalCost > 0 ? (expectedProfit / totalCost) * 100 : 0;
+
+  const moneyAfterFees = expectedSale - sellingFee;
+  const maxTotalCost = moneyAfterFees / (1 + minimumROI / 100);
+  const maxOffer = Math.max(
+    0,
+    (maxTotalCost - shipping - repair) / (1 + taxPercent / 100)
+  );
+  const openingOffer = Math.max(0, Math.floor((maxOffer * 0.85) / 10) * 10);
+
+  const result = $("analysisResult");
+  result.classList.remove("hidden");
+
+  const verdict = $("verdict");
+  if (expectedROI >= minimumROI) {
+    verdict.textContent = "GOOD FLIP";
+    verdict.className = "verdict good";
+  } else {
+    verdict.textContent = "NEGOTIATE LOWER";
+    verdict.className = "verdict bad";
+  }
+
+  $("resultProfit").textContent = `Expected Profit: ${money(expectedProfit)}`;
+  $("resultROI").textContent = `Expected ROI: ${expectedROI.toFixed(1)}%`;
+  $("maxOffer").textContent = `Walk-Away Price: ${money(maxOffer)}`;
+  $("openingOffer").textContent = `Suggested Opening Offer: ${money(openingOffer)}`;
+
+  const availableCash = calculateAvailableCash();
+  const cashCheck = $("cashCheck");
+  if (totalCost <= availableCash) {
+    cashCheck.textContent = `Fits bankroll. You currently have ${money(availableCash)} available.`;
+    cashCheck.className = "good";
+  } else {
+    cashCheck.textContent = `You need ${money(totalCost - availableCash)} more than your current available cash.`;
+    cashCheck.className = "warn";
+  }
+
+  currentDeal = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    item,
+    category,
+    buyPrice,
+    expectedSale,
+    feePercent,
+    shipping,
+    repair,
+    taxPercent,
+    totalCost,
+    expectedProfit,
+    expectedROI,
+    maxOffer,
+    openingOffer,
+    dateBought,
+    dateSold: null,
+    actualSalePrice: null,
+    status: "Bought"
+  };
+}
+
+function saveDeal() {
+  if (!currentDeal) {
+    alert("Analyze the deal first.");
+    return;
+  }
+
+  const deals = getDeals();
+  deals.push(currentDeal);
+  saveDeals(deals);
+  currentDeal = null;
+  updateEverything();
+  alert("Deal saved.");
+}
+
+function changeStatus(index, status) {
+  const deals = getDeals();
+  deals[index].status = status;
+
+  if (status === "Sold") {
+    if (deals[index].actualSalePrice == null) {
+      deals[index].actualSalePrice = deals[index].expectedSale;
+    }
+    if (!deals[index].dateSold) {
+      deals[index].dateSold = today();
+    }
+  }
+
+  saveDeals(deals);
+  updateEverything();
+}
+
+function updateSalePrice(index, value) {
+  const deals = getDeals();
+  deals[index].actualSalePrice = Number(value || 0);
+  saveDeals(deals);
+  updateEverything();
+}
+
+function updateSoldDate(index, value) {
+  const deals = getDeals();
+  deals[index].dateSold = value;
+  saveDeals(deals);
+  updateEverything();
+}
+
+function deleteDeal(index) {
+  const deals = getDeals();
+  deals.splice(index, 1);
+  saveDeals(deals);
+  updateEverything();
+}
+
+function clearDeals() {
+  if (!confirm("Delete every saved deal?")) return;
+  localStorage.removeItem("flipDeals");
+  updateEverything();
+}
+
+function updateDashboard() {
+  const deals = getDeals();
+  const soldDeals = deals.filter((d) => d.status === "Sold");
+  const unsoldDeals = deals.filter((d) => d.status !== "Sold");
+
+  const tiedUp = unsoldDeals.reduce((sum, d) => sum + Number(d.totalCost || 0), 0);
+  const realizedProfit = soldDeals.reduce((sum, d) => sum + getActualProfit(d), 0);
+
+  let totalROI = 0;
+  let totalDays = 0;
+  let datedSales = 0;
+
+  soldDeals.forEach((deal) => {
+    const profit = getActualProfit(deal);
+    if (deal.totalCost > 0) totalROI += (profit / deal.totalCost) * 100;
+    if (deal.dateBought && deal.dateSold) {
+      totalDays += daysBetween(deal.dateBought, deal.dateSold);
+      datedSales += 1;
+    }
+  });
+
+  const avgProfit = soldDeals.length ? realizedProfit / soldDeals.length : 0;
+  const avgROI = soldDeals.length ? totalROI / soldDeals.length : 0;
+  const avgDays = datedSales ? totalDays / datedSales : 0;
+
+  $("startingBankroll").textContent = money(getBankroll());
+  $("availableCash").textContent = money(calculateAvailableCash());
+  $("moneyTiedUp").textContent = money(tiedUp);
+  $("realizedProfit").textContent = money(realizedProfit);
+  $("soldCount").textContent = String(soldDeals.length);
+  $("activeInventory").textContent = String(unsoldDeals.length);
+  $("averageProfit").textContent = money(avgProfit);
+  $("averageROI").textContent = `${avgROI.toFixed(1)}%`;
+  $("averageDays").textContent = avgDays.toFixed(1);
+}
+
+function updateCategoryAnalytics() {
+  const soldDeals = getDeals().filter((d) => d.status === "Sold");
+  const groups = {};
+
+  soldDeals.forEach((deal) => {
+    const name = deal.category || "Other";
+    if (!groups[name]) {
+      groups[name] = { count: 0, profit: 0, days: 0, dated: 0, capital: 0 };
+    }
+    const g = groups[name];
+    const profit = getActualProfit(deal);
+    g.count += 1;
+    g.profit += profit;
+    g.capital += Number(deal.totalCost || 0);
+
+    if (deal.dateBought && deal.dateSold) {
+      g.days += daysBetween(deal.dateBought, deal.dateSold);
+      g.dated += 1;
+    }
+  });
+
+  const container = $("categoryAnalytics");
+  container.innerHTML = "";
+
+  const names = Object.keys(groups);
+  if (!names.length) {
+    container.innerHTML = '<p class="muted">Sell some items to unlock category analytics.</p>';
+    return;
+  }
+
+  names.forEach((name) => {
+    const g = groups[name];
+    const avgProfit = g.profit / g.count;
+    const avgDays = g.dated ? g.days / g.dated : 0;
+    const combinedROI = g.capital > 0 ? (g.profit / g.capital) * 100 : 0;
+    const profitPerDay = g.days > 0 ? g.profit / g.days : g.profit;
+
+    const card = document.createElement("div");
+    card.className = "category-card";
+    card.innerHTML = `
+      <h3>${name}</h3>
+      <div class="category-grid">
+        <div class="mini-stat"><span>Sold</span><strong>${g.count}</strong></div>
+        <div class="mini-stat"><span>Total Profit</span><strong>${money(g.profit)}</strong></div>
+        <div class="mini-stat"><span>Avg Profit</span><strong>${money(avgProfit)}</strong></div>
+        <div class="mini-stat"><span>Combined ROI</span><strong>${combinedROI.toFixed(1)}%</strong></div>
+        <div class="mini-stat"><span>Avg Days</span><strong>${avgDays.toFixed(1)}</strong></div>
+        <div class="mini-stat"><span>Profit / Day</span><strong>${money(profitPerDay)}</strong></div>
+        <div class="mini-stat"><span>Capital Used</span><strong>${money(g.capital)}</strong></div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function displayDeals() {
+  const deals = getDeals();
+  const container = $("dealHistory");
+  container.innerHTML = "";
+
+  if (!deals.length) {
+    container.innerHTML = '<p class="muted">No flips saved yet.</p>';
+    return;
+  }
+
+  deals.forEach((deal, index) => {
+    const age = deal.dateBought ? daysBetween(deal.dateBought, today()) : 0;
+    const warning = deal.status !== "Sold" && age >= 14
+      ? `<p class="warning-note">Sitting ${age} days — consider lowering the price.</p>`
+      : "";
+
+    let soldDetails = "";
+    if (deal.status === "Sold") {
+      const profit = getActualProfit(deal);
+      const days = daysBetween(deal.dateBought, deal.dateSold);
+      soldDetails = `
+        <div class="deal-actions">
+          <label>Actual sale price
+            <input type="number" step="0.01" value="${deal.actualSalePrice ?? deal.expectedSale}" data-sale-index="${index}">
+          </label>
+          <label>Date sold
+            <input type="date" value="${deal.dateSold || ""}" data-date-index="${index}">
+          </label>
+        </div>
+        <div class="deal-meta">
+          <div class="mini-stat"><span>Actual Profit</span><strong>${money(profit)}</strong></div>
+          <div class="mini-stat"><span>Days to Sell</span><strong>${days}</strong></div>
+          <div class="mini-stat"><span>Profit / Day</span><strong>${money(profit / Math.max(days, 1))}</strong></div>
+        </div>`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "deal-card";
+    card.innerHTML = `
+      <h3>${deal.item}</h3>
+      <p class="muted">${deal.category}</p>
+      <div class="deal-meta">
+        <div class="mini-stat"><span>Total Cost</span><strong>${money(deal.totalCost)}</strong></div>
+        <div class="mini-stat"><span>Expected Sale</span><strong>${money(deal.expectedSale)}</strong></div>
+        <div class="mini-stat"><span>Expected Profit</span><strong>${money(deal.expectedProfit)}</strong></div>
+        <div class="mini-stat"><span>Bought</span><strong>${deal.dateBought || "-"}</strong></div>
+      </div>
+      ${warning}
+      <div class="deal-actions">
+        <label>Status
+          <select data-status-index="${index}">
+            <option value="Bought" ${deal.status === "Bought" ? "selected" : ""}>Bought</option>
+            <option value="Listed" ${deal.status === "Listed" ? "selected" : ""}>Listed</option>
+            <option value="Sold" ${deal.status === "Sold" ? "selected" : ""}>Sold</option>
+          </select>
+        </label>
+        <button class="secondary small-button" data-delete-index="${index}">Delete</button>
+      </div>
+      ${soldDetails}`;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll("[data-status-index]").forEach((el) => {
+    el.addEventListener("change", () => changeStatus(Number(el.dataset.statusIndex), el.value));
+  });
+
+  container.querySelectorAll("[data-sale-index]").forEach((el) => {
+    el.addEventListener("change", () => updateSalePrice(Number(el.dataset.saleIndex), el.value));
+  });
+
+  container.querySelectorAll("[data-date-index]").forEach((el) => {
+    el.addEventListener("change", () => updateSoldDate(Number(el.dataset.dateIndex), el.value));
+  });
+
+  container.querySelectorAll("[data-delete-index]").forEach((el) => {
+    el.addEventListener("click", () => deleteDeal(Number(el.dataset.deleteIndex)));
+  });
+}
+
+function savePotentialDeals() {
+  localStorage.setItem("potentialDeals", JSON.stringify(potentialDeals));
+}
+
+function addPotentialDeal() {
+  const item = $("compareItem").value.trim() || "Unnamed Item";
+  const category = $("compareCategory").value;
+  const buyPrice = Number($("compareBuy").value);
+  const salePrice = Number($("compareSell").value);
+  const feePercent = Number($("compareFee").value || 0);
+  const extraCosts = Number($("compareExtra").value || 0);
+  const expectedDays = Number($("compareDays").value);
+
+  if (buyPrice <= 0 || salePrice <= 0 || expectedDays <= 0) {
+    alert("Enter valid comparison numbers.");
+    return;
+  }
+
+  const sellingFees = salePrice * (feePercent / 100);
+  const totalCost = buyPrice + extraCosts;
+  const profit = salePrice - sellingFees - totalCost;
+  const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+  const profitPerDay = profit / expectedDays;
+
+  potentialDeals.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    item,
+    category,
+    buyPrice,
+    salePrice,
+    totalCost,
+    profit,
+    roi,
+    expectedDays,
+    profitPerDay
+  });
+
+  savePotentialDeals();
+  displayPotentialDeals();
+}
+
+function removePotentialDeal(index) {
+  potentialDeals.splice(index, 1);
+  savePotentialDeals();
+  displayPotentialDeals();
+}
+
+function clearPotentialDeals() {
+  potentialDeals = [];
+  savePotentialDeals();
+  displayPotentialDeals();
+}
+
+function showBetterMove() {
+  const container = $("betterMove");
+  const availableCash = calculateAvailableCash();
+  const affordable = potentialDeals.filter((d) => d.totalCost <= availableCash);
+
+  if (!potentialDeals.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  if (!affordable.length) {
+    container.innerHTML = `<p class="warn"><strong>No affordable deals right now.</strong> Available cash: ${money(availableCash)}</p>`;
+    return;
+  }
+
+  const sorted = [...affordable].sort((a, b) => {
+    const diff = b.profitPerDay - a.profitPerDay;
+    if (Math.abs(diff) < 1) return b.roi - a.roi;
+    return diff;
+  });
+
+  const best = sorted[0];
+  container.innerHTML = `
+    <p class="muted">BETTER MOVE</p>
+    <h3>${best.item}</h3>
+    <p>${money(best.profit)} expected profit · ${best.roi.toFixed(1)}% ROI · ${best.expectedDays} days · ${money(best.profitPerDay)}/day</p>
+    <p class="good">Fits your current bankroll (${money(availableCash)} available).</p>`;
+}
+
+function displayPotentialDeals() {
+  const container = $("dealComparison");
+  container.innerHTML = "";
+
+  if (!potentialDeals.length) {
+    container.innerHTML = '<p class="muted">No deals added yet.</p>';
+    showBetterMove();
+    return;
+  }
+
+  const availableCash = calculateAvailableCash();
+
+  potentialDeals.forEach((deal, index) => {
+    const canAfford = deal.totalCost <= availableCash;
+    const card = document.createElement("div");
+    card.className = "compare-card";
+    card.innerHTML = `
+      <h3>${deal.item}</h3>
+      <p class="muted">${deal.category}</p>
+      <div class="compare-grid">
+        <div class="mini-stat"><span>Cash Needed</span><strong>${money(deal.totalCost)}</strong></div>
+        <div class="mini-stat"><span>Profit</span><strong>${money(deal.profit)}</strong></div>
+        <div class="mini-stat"><span>ROI</span><strong>${deal.roi.toFixed(1)}%</strong></div>
+        <div class="mini-stat"><span>Days</span><strong>${deal.expectedDays}</strong></div>
+        <div class="mini-stat"><span>Profit / Day</span><strong>${money(deal.profitPerDay)}</strong></div>
+      </div>
+      <p class="${canAfford ? "good" : "warn"}">${canAfford ? "Fits your bankroll" : "Not enough available cash"}</p>
+      <button class="secondary small-button" data-remove-compare="${index}">Remove</button>`;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll("[data-remove-compare]").forEach((el) => {
+    el.addEventListener("click", () => removePotentialDeal(Number(el.dataset.removeCompare)));
+  });
+
+  showBetterMove();
+}
+
+function updateEverything() {
+  $("bankroll").value = getBankroll();
+  updateDashboard();
+  updateCategoryAnalytics();
+  displayDeals();
+  displayPotentialDeals();
+}
+
+$("dateBought").value = today();
+$("saveBankrollBtn").addEventListener("click", saveBankroll);
+$("analyzeBtn").addEventListener("click", calculateFlip);
+$("saveDealBtn").addEventListener("click", saveDeal);
+$("addCompareBtn").addEventListener("click", addPotentialDeal);
+$("clearCompareBtn").addEventListener("click", clearPotentialDeals);
+$("clearDealsBtn").addEventListener("click", clearDeals);
+
+updateEverything();
+
+  </script>
+</body>
+</html>
